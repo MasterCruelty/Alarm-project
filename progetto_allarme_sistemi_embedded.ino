@@ -117,13 +117,20 @@ void loop() {
       tone(49, NOTE_C3, durata_suono);
       char input = key.getKey();
       cursorCurrentPosition += 1;
-      s.concat(String(input));
-      if(input){
-        if(s.startsWith("C")){
-          Serial.print(input);
-          lcd.setCursor(0,cursorCurrentPosition-1);
-          lcd.print(" ");
+      if(input == 'C'){
+         /*String new_s = "";
+         for(int i = 0;i < s.length()-1;i++){
+          new_s = s.charAt(i);
+         }
+         s = new_s;*/
+         s="";
+         lcd.clear();
+         lcd.print(s);
         }
+      else{
+        s.concat(String(input));
+      }
+      if(input && !(input == 'C')){
         lcd.print(input);
         delay(500);
         if (s.startsWith("117") && s.endsWith("*")){
