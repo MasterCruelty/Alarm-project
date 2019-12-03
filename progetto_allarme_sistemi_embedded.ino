@@ -26,16 +26,16 @@ LiquidCrystal lcd(41,39,37,35,33,31);
 #define trig_pin 51
 
 //******
-#define echo_pin2 55
-#define trig_pin2 57
-#define echo_pin3 59
-#define trig_pin3 61
+#define echo_pin2 52
+#define trig_pin2 50
+#define echo_pin3 48
+#define trig_pin3 46
 //******
 
 //definizione pin per i 3 led
 #define GREEN 42
 #define RED 44
-#define YELLOW 46
+#define YELLOW 40
 //istanza sensori di prossimità
 SR04 sensore  = SR04(echo_pin,trig_pin);
 
@@ -114,7 +114,7 @@ void loop() {
     lcd.print("codice sblocco:");
     lcd.setCursor(0,1);  
     while(true){
-      tone(48, NOTE_C3, durata_suono);
+      tone(49, NOTE_C3, durata_suono);
       char input = key.getKey();
       cursorCurrentPosition += 1;
       s.concat(String(input));
