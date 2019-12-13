@@ -10,11 +10,10 @@
  * LCD R/W pin to ground
  * LCD VSS pin to ground
  * LCD VCC pin to 5V
- * 10K resistor:
  * ends to +5V and ground
  * wiper to LCD VO pin (pin 3)
 */
-// include the library code:
+// importazione librerie:
 #include <LiquidCrystal.h>
 #include <SR04.h>
 #include <pitches.h>
@@ -22,38 +21,33 @@
 // inizializzazione display lcd 
 LiquidCrystal lcd(41,39,37,35,33,31);
 //definizione pin per sensore di prossimità
+//sensore 1
 #define echo_pin 53
 #define trig_pin 51
-
-//******
+//sensore 2
 #define echo_pin2 52
 #define trig_pin2 50
+//sensore 3
 #define echo_pin3 48
 #define trig_pin3 46
-//******
+
 
 //definizione pin per i 3 led
 #define GREEN 42
 #define RED 44
 #define YELLOW 40
+
 //istanza sensori di prossimità
 SR04 sensore  = SR04(echo_pin,trig_pin);
-
-//******
 SR04 sensore2 = SR04(echo_pin2,trig_pin2);
 SR04 sensore3 = SR04(echo_pin3,trig_pin3);
-//******
+
 
 //definizione variabili per la misurazione delle distanze e la durata del suono del buzzer
 long distanza;
-
-//******
 long distanza2;
 long distanza3;
-//******
-
-int durata_suono = 100;
-
+int  durata_suono = 100;
 
 //definizione keypad, impostazioni righe/colonne
 const byte rows = 4; 
@@ -66,12 +60,13 @@ char Keys[rows][cols] = {
   {'*', '0', '#', 'D'}
 };
 
+//definizione pin keypad
 byte colPins[cols] = {6,7,8,9};
 byte rowPins[rows] = {2,3,4,5}; 
 //inizializzazione del keypad
 Keypad key = Keypad(makeKeymap(Keys), rowPins, colPins, rows, cols); 
-String s = "";
-int cursorCurrentPosition = 0;
+String s = ""; // stringa per il codice di sblocco
+
 
 void setup() {
   Serial.begin(9600);
@@ -94,11 +89,8 @@ void setup() {
 void loop() {
   //assegnamento variabili che contengono la misurazione dei 3 sensori
   distanza  = sensore.Distance();
-
-  //******
   distanza2 = sensore2.Distance();
   distanza3 = sensore3.Distance();
-  //******
   
   digitalWrite(RED,LOW);
   digitalWrite(GREEN,LOW);
@@ -111,21 +103,12 @@ void loop() {
     digitalWrite(RED,HIGH);
     delay(1000);
     lcd.clear();
-    lcd.print("codice sblocco:");
-    lcd.setCursor(0,1);  
+    print_stringa_sblocco();  
     while(true){
       tone(49, NOTE_C3, durata_suono);
       char input = key.getKey();
-      cursorCurrentPosition += 1;
       if(input == 'C'){
-         /*String new_s = "";
-         for(int i = 0;i < s.length()-1;i++){
-          new_s = s.charAt(i);
-         }
-         s = new_s;*/
-         s="";
-         lcd.clear();
-         lcd.print(s);
+         s = cancella(s);
         }
       else{
         s.concat(String(input));
@@ -146,6 +129,7 @@ void loop() {
           s = "";
           delay(1000);
           lcd.clear();
+          print_stringa_sblocco();
           continue;
         }
       }
@@ -173,4 +157,16 @@ void loop() {
   }
   delay(1000);
   lcd.clear();
+}
+
+void print_stringa_sblocco(){
+  lcd.print("codice sblocco:");
+  lcd.setCursor(0,1);
+}
+
+String cancella(String str){
+  lcd.clear();
+  str="";
+  print_stringa_sblocco();
+  return str;
 }
