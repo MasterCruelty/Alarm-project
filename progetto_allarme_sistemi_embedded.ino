@@ -44,9 +44,9 @@ SR04 sensore3 = SR04(echo_pin3,trig_pin3);
 
 
 //definizione variabili per la misurazione delle distanze e la durata del suono del buzzer
-long distanza;
-long distanza2;
-long distanza3;
+int distanza;
+int distanza2;
+int distanza3;
 int  durata_suono = 100;
 
 //definizione keypad, impostazioni righe/colonne
@@ -67,6 +67,84 @@ byte rowPins[rows] = {2,3,4,5};
 Keypad key = Keypad(makeKeymap(Keys), rowPins, colPins, rows, cols); 
 String s = ""; // stringa per il codice di sblocco
 
+//definizione variabili per i valori di normalità dei 3 sensori
+int safety1 = 0;
+int safety2 = 0;
+int safety3 = 0;
+
+void print_stringa_sblocco(){
+  lcd.print("codice sblocco:");
+  lcd.setCursor(0,1);
+}
+
+String cancella(String str){
+  lcd.clear();
+  str="";
+  print_stringa_sblocco();
+  return str;
+}
+
+int monitoraggio(SR04 sensor){
+  int result = 0;
+  int distanza = 0;
+  for(int i = 0;i <= 150;i++){
+    distanza = sensor.Distance();
+    if(distanza - result >= 10){
+      result = distanza;
+    }
+    else{
+      continue;
+    }
+  }
+  return result;
+}
+
+void stampa_misurazione(String s, int n){
+  lcd.print("Sensore " + s + ":");
+  lcd.setCursor(0,1);
+  lcd.print(n);
+  lcd.print("cm");
+  delay(2000);
+}
+
+boolean controllo(int sensor,int misurazione){
+  int safe = 0;
+  switch(sensor){
+    case 1: safe = safety1; break;
+    case 2: safe = safety2; break;
+    case 3: safe = safety3; break;
+  }
+  if(misurazione < (safe - 5)){
+    lcd.print("Area violata su");
+    lcd.setCursor(0,1);
+    lcd.print("sensore ");
+    lcd.print(String(sensor) + ": ");
+    lcd.print(misurazione);
+    lcd.print("cm");
+    digitalWrite(RED,HIGH);
+    delay(2500);
+    lcd.clear();
+    print_stringa_sblocco();
+    return false;
+  }
+  else{
+      if(misurazione < 400){
+        lcd.print("Area sicura");
+        digitalWrite(GREEN,HIGH);
+        delay(1000);
+        lcd.clear();
+      }
+      else{
+       lcd.print("Fuori scala");
+       lcd.setCursor(0,1);
+       lcd.print(">= 400cm");
+       digitalWrite(YELLOW,HIGH);
+       delay(2000);
+       lcd.clear(); 
+      }
+  }
+  return true;
+}
 
 void setup() {
   Serial.begin(9600);
@@ -84,6 +162,22 @@ void setup() {
   digitalWrite(RED,LOW);
   digitalWrite(YELLOW,LOW);
   lcd.clear();
+  //monitoraggio per la definizione della distanza "normale" per tutti i sensori
+  lcd.print("Monitorando...");
+  safety1 = monitoraggio(sensore);
+  lcd.clear();
+  stampa_misurazione("1",safety1);
+  lcd.clear();
+  lcd.print("Monitorando...");
+  safety2 = monitoraggio(sensore2);
+  lcd.clear();
+  stampa_misurazione("2",safety2);
+  lcd.clear();
+  lcd.print("Monitorando...");
+  safety3 = monitoraggio(sensore3); 
+  lcd.clear();
+  stampa_misurazione("3",safety3);
+  lcd.clear();
 }
 
 void loop() {
@@ -95,15 +189,8 @@ void loop() {
   digitalWrite(RED,LOW);
   digitalWrite(GREEN,LOW);
   digitalWrite(YELLOW,LOW);
-  if(distanza <= 20){
-    lcd.print("Area violata");
-    lcd.setCursor(0,1);
-    lcd.print(distanza);
-    lcd.print("cm");
-    digitalWrite(RED,HIGH);
-    delay(1000);
-    lcd.clear();
-    print_stringa_sblocco();  
+  
+  if(not(controllo(1,distanza)) || not(controllo(2,distanza2))|| not(controllo(3,distanza3))){  
     while(true){
       tone(49, NOTE_C3, durata_suono);
       char input = key.getKey();
@@ -135,38 +222,5 @@ void loop() {
       }
     }
   }
-  else if(distanza > 400){
-    lcd.print("Fuori range");
-    lcd.setCursor(0,1);
-    lcd.print("Distanza > 400cm");
-    digitalWrite(GREEN,HIGH);
-    digitalWrite(RED,HIGH);
-    digitalWrite(YELLOW,HIGH);
-  }
-  else{
-    lcd.print("Area sicura");
-    lcd.setCursor(0,1);
-    lcd.print(distanza);
-    lcd.print("cm");
-    if(distanza >=30){
-      digitalWrite(GREEN,HIGH);
-    }
-    else{
-      digitalWrite(YELLOW,HIGH);
-    }
-  }
-  delay(1000);
   lcd.clear();
-}
-
-void print_stringa_sblocco(){
-  lcd.print("codice sblocco:");
-  lcd.setCursor(0,1);
-}
-
-String cancella(String str){
-  lcd.clear();
-  str="";
-  print_stringa_sblocco();
-  return str;
 }
