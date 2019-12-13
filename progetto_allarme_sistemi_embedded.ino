@@ -118,10 +118,11 @@ boolean controllo(int sensor,int misurazione){
     case 3: safe = safety3; break;
   }
   if(misurazione < (safe - 5)){
+    digitalWrite(RED,HIGH);
+    digitalWrite(GREEN,LOW);
     lcd.print("Area violata su");
     lcd.setCursor(0,1);
     stampa_misurazione(String(sensor),misurazione);
-    digitalWrite(RED,HIGH);
     delay(2500);
     lcd.clear();
     print_stringa_sblocco();
