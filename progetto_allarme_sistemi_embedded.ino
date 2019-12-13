@@ -77,6 +77,7 @@ void print_stringa_sblocco(){
   lcd.setCursor(0,1);
 }
 
+//permette di cancellare quando si digita sul tastierino
 String cancella(String str){
   lcd.clear();
   str="";
@@ -84,6 +85,7 @@ String cancella(String str){
   return str;
 }
 
+//definisce per la distanza normale del sensore passato come argomento
 int monitoraggio(SR04 sensor){
   int result = 0;
   int distanza = 0;
@@ -99,14 +101,15 @@ int monitoraggio(SR04 sensor){
   return result;
 }
 
+//stampa su schermo la misurazione del sensore passato come argomento
 void stampa_misurazione(String s, int n){
-  lcd.print("Sensore " + s + ":");
-  lcd.setCursor(0,1);
+  lcd.print("Sensore " + s + ": ");
   lcd.print(n);
   lcd.print("cm");
   delay(2000);
 }
 
+//effettua il controllo confrontando la distanza normale con la misurazione attuale del sensore passato come argomento
 boolean controllo(int sensor,int misurazione){
   int safe = 0;
   switch(sensor){
@@ -117,10 +120,7 @@ boolean controllo(int sensor,int misurazione){
   if(misurazione < (safe - 5)){
     lcd.print("Area violata su");
     lcd.setCursor(0,1);
-    lcd.print("sensore ");
-    lcd.print(String(sensor) + ": ");
-    lcd.print(misurazione);
-    lcd.print("cm");
+    stampa_misurazione(String(sensor),misurazione);
     digitalWrite(RED,HIGH);
     delay(2500);
     lcd.clear();
