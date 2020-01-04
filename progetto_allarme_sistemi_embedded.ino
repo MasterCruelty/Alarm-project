@@ -13,10 +13,6 @@
    wiper to LCD VO pin (pin 3)
 */
 
-//seriale virtuale per poter collegare esp8266 a pin diversi da 0 e 1, cosi da evitare la perdità della comunicazione via usb
-//#include <SoftwareSerial.h>
-//SoftwareSerial mySerial(19, 18);  //RX,TX
-
 // importazione librerie:
 #include <LiquidCrystal.h>
 #include <SR04.h>
@@ -26,7 +22,8 @@
 // inizializzazione display lcd
 LiquidCrystal lcd(41, 39, 37, 35, 33, 31);
 
-//definizione pin per sensore di prossimità
+//definizione pin per i sensori di prossimità
+
 //sensore 1
 #define echo_pin 53
 #define trig_pin 51
@@ -37,17 +34,15 @@ LiquidCrystal lcd(41, 39, 37, 35, 33, 31);
 #define echo_pin3 48
 #define trig_pin3 46
 
-
-//definizione pin per i 3 led
-#define GREEN 42
-#define RED 44
-#define YELLOW 40
-
 //istanza sensori di prossimità
 SR04 sensore  = SR04(echo_pin, trig_pin);
 SR04 sensore2 = SR04(echo_pin2, trig_pin2);
 SR04 sensore3 = SR04(echo_pin3, trig_pin3);
 
+//definizione pin per i 3 led
+#define GREEN 42
+#define RED 44
+#define YELLOW 40
 
 //definizione variabili per la misurazione delle distanze e la durata del suono del buzzer
 int distanza;
@@ -69,6 +64,7 @@ char Keys[rows][cols] = {
 //definizione pin keypad
 byte colPins[cols] = {6, 7, 8, 9};
 byte rowPins[rows] = {2, 3, 4, 5};
+
 //inizializzazione del keypad
 Keypad key = Keypad(makeKeymap(Keys), rowPins, colPins, rows, cols);
 String s = ""; // stringa per il codice di sblocco
@@ -77,7 +73,6 @@ String s = ""; // stringa per il codice di sblocco
 int safety1 = 0;
 int safety2 = 0;
 int safety3 = 0;
-
 
 //stampa la stringa ogni volta che è richiesto il codice di sblocco
 void print_stringa_sblocco() {
@@ -93,7 +88,7 @@ String cancella(String str) {
   return str;
 }
 
-//definisce per la distanza normale del sensore passato come argomento
+//definisce il valore della distanza normale del sensore passato come argomento
 int monitoraggio(SR04 sensor) {
   int result = 0;
   int distanza = 0;
@@ -131,7 +126,7 @@ boolean controllo(int sensor, int misurazione) {
     lcd.print("Area violata su");
     lcd.setCursor(0, 1);
     stampa_misurazione(String(sensor), misurazione);
-    delay(2500);
+    delay(1500);
     lcd.clear();
     print_stringa_sblocco();
     return false;
@@ -202,6 +197,7 @@ void loop() {
   digitalWrite(GREEN, LOW);
   digitalWrite(YELLOW, LOW);
 
+  //condizione che verifica che non ci sia un'anomalia dalla situazione monitorata inizialmente
   if (not(controllo(1, distanza)) || not(controllo(2, distanza2)) || not(controllo(3, distanza3))) {
     while (true) {
       tone(49, NOTE_C3, durata_suono);
